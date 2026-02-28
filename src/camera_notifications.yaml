@@ -1,0 +1,149 @@
+---
+mode: parallel
+
+blueprint:
+  name: Frigate / Reolink Notifications
+  domain: automation
+
+  input:
+    trigger_sensor:
+      name: Trigger sensor
+      description: Binary sensor that triggers the notification (doorbell, Frigate person, etc).
+      selector:
+        entity:
+          filter:
+            - integration: frigate
+              domain: binary_sensor
+              device_class: occupancy
+            - integration: reolink
+              domain: binary_sensor
+
+    camera_entity:
+      name: Camera entity
+      description: Camera to take the snapshot from.
+      selector:
+        entity:
+          domain: camera
+
+    notification_message:
+      name: Message
+      selector:
+        text:
+          multiline: true
+
+    notification_title:
+      name: Title
+      description: Optional.
+      default: ""
+      selector:
+        text:
+
+    notification_icon:
+      name: Icon
+      default: mdi:cctv
+      selector:
+        icon:
+
+    notification_color:
+      name: Color
+      default: "#0000ff"
+      selector:
+        text:
+          type: color
+
+    notification_group:
+      name: Group
+      description: https://companion.home-assistant.io/docs/notifications/notifications-basic/#grouping
+      default: ""
+      selector:
+        text:
+
+    notification_channel:
+      name: Channel
+      description: https://companion.home-assistant.io/docs/notifications/notifications-basic/#notification-channels
+      default: Camera Detection
+      selector:
+        text:
+
+    notification_visibility:
+      name: Visibility
+      description: https://companion.home-assistant.io/docs/notifications/notifications-basic/#notification-sensitivity--lock-screen-visibility
+      default: public
+      selector:
+        select:
+          mode: dropdown
+          options:
+            - public
+            - private
+            - secret
+
+    notification_vibration_pattern:
+      name: Vibration pattern
+      description: https://companion.home-assistant.io/docs/notifications/notifications-basic/#notification-vibration-pattern
+      default: "100, 1000, 100, 1000, 100, 1000"
+      selector:
+        text:
+
+    notification_click_action:
+      name: Click action
+      description: https://companion.home-assistant.io/docs/notifications/notifications-basic/#opening-a-url
+      default: ""
+      selector:
+        text:
+          type: url
+
+    notification_rate_limit:
+      name: Rate limit
+      description: Minimum time between notifications.
+      default: 30
+      selector:
+        number:
+          min: 0
+          max: 300
+          step: 1
+          unit_of_measurement: seconds
+          mode: box
+
+trigger:
+  - platform: state
+    entity_id: !input trigger_sensor
+    to: "on"
+
+condition:
+  - condition: template
+    value_template: >
+      {% set last = this.attributes.last_triggered %}
+      {% set limit = notification_rate_limit %}
+      {{ last is none or (as_timestamp(now()) - as_timestamp(last)) > limit }}
+
+variables:
+  entity_short_id: "{{ trigger.entity_id.split('.')[1] }}"
+  timestamp: "{{ now().strftime('%Y%m%d_%H%M%S') }}"
+  snapshot_file_name: "{{ entity_short_id }}_{{ timestamp }}.jpg"
+  snapshot_path: "/config/www/snapshots/{{ file_name }}"
+  snapshot_url: "/local/snapshots/{{ file_name }}"
+  notification_rate_limit: !input notification_rate_limit
+
+action:
+  - service: camera.snapshot
+    target:
+      entity_id: !input camera_entity
+    data:
+      filename: "{{ snapshot_file }}"
+
+  - service: notify.all_devices
+    data:
+      message: !input notification_message
+      title: !input notification_title
+      data:
+        image: "{{ snapshot_url }}"
+        notification_icon: !input notification_icon
+        group: !input notification_group
+        channel: !input notification_channel
+        vibrationPattern: !input notification_vibration_pattern
+        importance: high
+        priority: high
+        visibility: !input notification_visibility
+        color: !input notification_color
+        ttl: 0
+        clickAction: !input notification_click_action
