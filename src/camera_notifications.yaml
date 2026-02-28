@@ -8,7 +8,7 @@ blueprint:
   input:
     trigger_sensor:
       name: Trigger sensor
-      description: Binary sensor that triggers the notification (doorbell, Frigate person, etc).
+      description: Binary sensor that triggers the notification (doorbell, Frigate occupancy, etc).
       selector:
         entity:
           filter:
@@ -18,12 +18,20 @@ blueprint:
             - integration: reolink
               domain: binary_sensor
 
-    camera_entity:
-      name: Camera entity
-      description: Camera to take the snapshot from.
+    media_entity:
+      name: Camera or image
+      description: Camera or image entity to snapshot and use as the notification image.
       selector:
         entity:
-          domain: camera
+          filter:
+            - integration: reolink
+              domain:
+                - camera
+                - image
+            - integration: frigate
+              domain:
+                - camera
+                - image
 
     notification_message:
       name: Message
@@ -33,7 +41,7 @@ blueprint:
 
     notification_title:
       name: Title
-      description: Optional.
+      description: Optional title for the notification.
       default: ""
       selector:
         text:
@@ -67,11 +75,10 @@ blueprint:
 
     notification_visibility:
       name: Visibility
-      description: https://companion.home-assistant.io/docs/notifications/notifications-basic/#notification-sensitivity--lock-screen-visibility
+      description: https://companion.home-assistant.io/docs/notifications/notifications-basic/#notification-visibility
       default: public
       selector:
         select:
-          mode: dropdown
           options:
             - public
             - private
@@ -109,13 +116,6 @@ trigger:
     entity_id: !input trigger_sensor
     to: "on"
 
-condition:
-  - condition: template
-    value_template: >-
-      {% set last = this.attributes.last_triggered %}
-      {% set limit = notification_rate_limit %}
-      {{ last is none or (as_timestamp(now()) - as_timestamp(last)) > limit }}
-
 variables:
   entity_short_id: "{{ trigger.entity_id.split('.')[1] }}"
   timestamp: "{{ now().strftime('%Y%m%d_%H%M%S') }}"
@@ -123,13 +123,37 @@ variables:
   snapshot_path: "/config/www/snapshots/{{ snapshot_file_name }}"
   snapshot_url: "/local/snapshots/{{ snapshot_file_name }}"
   notification_rate_limit: !input notification_rate_limit
+  media_entity: !input media_entity
+  media_domain: "{{ media_entity.split('.')[0] }}"
+
+condition:
+  - condition: template
+    value_template: >-
+      {% set last = this.attributes.last_triggered %}
+      {% set limit = notification_rate_limit %}
+      {{ last is none or (as_timestamp(now()) - as_timestamp(last)) > limit }}
 
 action:
-  - service: camera.snapshot
-    target:
-      entity_id: !input camera_entity
-    data:
-      filename: "{{ snapshot_path }}"
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ media_domain == 'camera' }}"
+        sequence:
+          - service: camera.snapshot
+            target:
+              entity_id: !input media_entity
+            data:
+              filename: "{{ snapshot_path }}"
+
+      - conditions:
+          - condition: template
+            value_template: "{{ media_domain == 'image' }}"
+        sequence:
+          - service: image.snapshot
+            target:
+              entity_id: !input media_entity
+            data:
+              filename: "{{ snapshot_path }}"
 
   - service: notify.all_devices
     data:
