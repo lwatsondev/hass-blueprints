@@ -111,7 +111,7 @@ trigger:
 
 condition:
   - condition: template
-    value_template: >
+    value_template: >-
       {% set last = this.attributes.last_triggered %}
       {% set limit = notification_rate_limit %}
       {{ last is none or (as_timestamp(now()) - as_timestamp(last)) > limit }}
