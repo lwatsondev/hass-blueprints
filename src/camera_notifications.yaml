@@ -7,8 +7,8 @@ blueprint:
 
   input:
     trigger_sensor:
-      name: Trigger sensor
-      description: Binary sensor that triggers the notification (doorbell, Frigate occupancy, etc).
+      name: Trigger
+      description: Sensor that triggers the notification (doorbell, Frigate occupancy, etc).
       selector:
         entity:
           filter:
@@ -19,7 +19,7 @@ blueprint:
               domain: binary_sensor
 
     media_entity:
-      name: Media entity
+      name: Image
       description: Camera or image entity to snapshot and use as the notification image.
       selector:
         entity:
