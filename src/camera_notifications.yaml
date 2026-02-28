@@ -120,8 +120,8 @@ variables:
   entity_short_id: "{{ trigger.entity_id.split('.')[1] }}"
   timestamp: "{{ now().strftime('%Y%m%d_%H%M%S') }}"
   snapshot_file_name: "{{ entity_short_id }}_{{ timestamp }}.jpg"
-  snapshot_path: "/config/www/snapshots/{{ file_name }}"
-  snapshot_url: "/local/snapshots/{{ file_name }}"
+  snapshot_path: "/config/www/snapshots/{{ snapshot_file_name }}"
+  snapshot_url: "/local/snapshots/{{ snapshot_file_name }}"
   notification_rate_limit: !input notification_rate_limit
 
 action:
