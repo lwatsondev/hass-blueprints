@@ -1,6 +1,6 @@
 # hass-blueprints
 
-Some Home Assistant blueprints I made. 
+Some Home Assistant blueprints I made.
 
 ### Frigate / Reolink Notifications
 
