@@ -19,7 +19,7 @@ blueprint:
               domain: binary_sensor
 
     media_entity:
-      name: Camera or image
+      name: Media entity
       description: Camera or image entity to snapshot and use as the notification image.
       selector:
         entity:
