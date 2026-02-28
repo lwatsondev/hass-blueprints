@@ -121,14 +121,13 @@ trigger:
     to: "on"
 
 variables:
-  entity_short_id: "{{ trigger.entity_id.split('.')[1] }}"
   timestamp: "{{ now().strftime('%Y%m%d_%H%M%S') }}"
-  snapshot_file_name: "{{ entity_short_id }}_{{ timestamp }}.jpg"
+  snapshot_file_name: "{{ media_entity }}_{{ timestamp }}.jpg"
   snapshot_path: "/config/www/snapshots/{{ snapshot_file_name }}"
   snapshot_url: "/local/snapshots/{{ snapshot_file_name }}"
-  notification_rate_limit: !input notification_rate_limit
   media_entity: !input media_entity
   media_domain: "{{ media_entity.split('.')[0] }}"
+  notification_rate_limit: !input notification_rate_limit
 
 condition:
   - condition: template
