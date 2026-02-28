@@ -57,7 +57,7 @@ blueprint:
     notification_color:
       name: Color
       default: "#0000ff"
-      description: Android notification color in hex format.
+      description: Android notification icon color.
       selector:
         text:
           type: color
