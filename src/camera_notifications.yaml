@@ -79,6 +79,7 @@ blueprint:
       default: public
       selector:
         select:
+          type: dropdown
           options:
             - public
             - private
