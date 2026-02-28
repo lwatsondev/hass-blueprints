@@ -35,6 +35,7 @@ blueprint:
 
     notification_message:
       name: Message
+      description: The main text of the notification. Required.
       selector:
         text:
           multiline: true
@@ -48,6 +49,7 @@ blueprint:
 
     notification_icon:
       name: Icon
+      description: Android notification icon.
       default: mdi:cctv
       selector:
         icon:
@@ -55,6 +57,7 @@ blueprint:
     notification_color:
       name: Color
       default: "#0000ff"
+      description: Android notification color in hex format.
       selector:
         text:
           type: color
@@ -102,7 +105,7 @@ blueprint:
 
     notification_rate_limit:
       name: Rate limit
-      description: Minimum time between notifications.
+      description: Minimum time between notifications. Activity within this time will not trigger a new notification.
       default: 30
       selector:
         number:
