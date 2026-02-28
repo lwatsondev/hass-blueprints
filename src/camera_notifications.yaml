@@ -124,7 +124,7 @@ variables:
   timestamp: "{{ now().strftime('%Y%m%d_%H%M%S') }}"
   media_entity: !input media_entity
   media_domain: "{{ media_entity.split('.')[0] }}"
-  snapshot_file_name: "{{ trigger.entity_id }}_{{ timestamp }}.jpg"
+  snapshot_file_name: "{{ trigger.entity_id|split('.')[1] }}_{{ timestamp }}.jpg"
   snapshot_path: "/config/www/snapshots/{{ snapshot_file_name }}"
   snapshot_url: "/local/snapshots/{{ snapshot_file_name }}"
   notification_rate_limit: !input notification_rate_limit
