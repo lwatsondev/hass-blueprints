@@ -129,7 +129,7 @@ action:
     target:
       entity_id: !input camera_entity
     data:
-      filename: "{{ snapshot_file }}"
+      filename: "{{ snapshot_path }}"
 
   - service: notify.all_devices
     data:
