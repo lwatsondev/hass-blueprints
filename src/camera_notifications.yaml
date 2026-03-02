@@ -158,8 +158,6 @@ action:
             data:
               filename: "{{ snapshot_path }}"
 
-  - delay: "00:00:01"
-
   - service: notify.all_devices
     data:
       message: !input notification_message
