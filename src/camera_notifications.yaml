@@ -115,6 +115,13 @@ blueprint:
           unit_of_measurement: seconds
           mode: box
 
+    notification_delay:
+      name: Delay
+      description: How long to wait to send a notification after taking a snapshot.
+      default: "00:00:00"
+      selector:
+        duration:
+
 trigger:
   - platform: state
     entity_id: !input trigger_sensor
@@ -157,6 +164,8 @@ action:
               entity_id: !input media_entity
             data:
               filename: "{{ snapshot_path }}"
+
+  - delay: !input notification_delay
 
   - service: notify.all_devices
     data:
