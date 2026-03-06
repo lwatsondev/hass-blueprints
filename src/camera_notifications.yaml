@@ -18,9 +18,9 @@ blueprint:
             - integration: reolink
               domain: binary_sensor
 
-    media_entity:
+    notification_image:
       name: Image
-      description: Camera or image entity to snapshot and use as the notification image.
+      description: Camera or image entity to snapshot and use as the notification image. Required.
       selector:
         entity:
           filter:
@@ -129,8 +129,8 @@ trigger:
 
 variables:
   timestamp: "{{ now().strftime('%Y%m%d_%H%M%S') }}"
-  media_entity: !input media_entity
-  media_domain: "{{ media_entity.split('.')[0] }}"
+  notification_image: !input notification_image
+  notification_image_domain: "{{ notification_image.split('.')[0] }}"
   snapshot_file_name: "{{ trigger.entity_id.split('.')[1] }}_{{ timestamp }}.jpg"
   snapshot_path: "/config/www/snapshots/{{ snapshot_file_name }}"
   snapshot_url: "/local/snapshots/{{ snapshot_file_name }}"
@@ -147,21 +147,21 @@ action:
   - choose:
       - conditions:
           - condition: template
-            value_template: "{{ media_domain == 'camera' }}"
+            value_template: "{{ notification_image_domain == 'camera' }}"
         sequence:
           - service: camera.snapshot
             target:
-              entity_id: !input media_entity
+              entity_id: "{{ notification_image }}"
             data:
               filename: "{{ snapshot_path }}"
 
       - conditions:
           - condition: template
-            value_template: "{{ media_domain == 'image' }}"
+            value_template: "{{ notification_image_domain == 'image' }}"
         sequence:
           - service: image.snapshot
             target:
-              entity_id: !input media_entity
+              entity_id: "{{ notification_image }}"
             data:
               filename: "{{ snapshot_path }}"
 
