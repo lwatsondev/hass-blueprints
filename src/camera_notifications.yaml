@@ -18,20 +18,13 @@ blueprint:
             - integration: reolink
               domain: binary_sensor
 
-    notification_image:
-      name: Image
-      description: Camera or image entity to snapshot and use as the notification image. Required.
+    notification_targets:
+      name: Notification targets
+      description: Notification entities to send the notification to.
       selector:
         entity:
-          filter:
-            - integration: reolink
-              domain:
-                - camera
-                - image
-            - integration: frigate
-              domain:
-                - camera
-                - image
+          domain: notify
+          multiple: true
 
     notification_message:
       name: Message
@@ -46,6 +39,21 @@ blueprint:
       default: ""
       selector:
         text:
+
+    notification_image:
+      name: Image
+      description: Camera or image entity to snapshot and use as the notification image. Required.
+      selector:
+        entity:
+          filter:
+            - integration: reolink
+              domain:
+                - camera
+                - image
+            - integration: frigate
+              domain:
+                - camera
+                - image
 
     notification_icon:
       name: Icon
@@ -129,12 +137,13 @@ trigger:
 
 variables:
   timestamp: "{{ now().strftime('%Y%m%d_%H%M%S') }}"
+  notification_targets: !input notification_targets
   notification_image: !input notification_image
   notification_image_domain: "{{ notification_image.split('.')[0] }}"
+  notification_rate_limit: !input notification_rate_limit
   snapshot_file_name: "{{ trigger.entity_id.split('.')[1] }}_{{ timestamp }}.jpg"
   snapshot_path: "/config/www/snapshots/{{ snapshot_file_name }}"
   snapshot_url: "/local/snapshots/{{ snapshot_file_name }}"
-  notification_rate_limit: !input notification_rate_limit
 
 condition:
   - condition: template
@@ -167,7 +176,9 @@ action:
 
   - delay: !input notification_delay
 
-  - service: notify.all_devices
+  - action: notify.send_message
+    target:
+      entity_id: "{{ notification_targets }}"
     data:
       message: !input notification_message
       title: !input notification_title
