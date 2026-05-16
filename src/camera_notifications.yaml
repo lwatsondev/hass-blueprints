@@ -20,10 +20,9 @@ blueprint:
 
     notification_target:
       name: Notification target
-      description: Notification entity to send the notification to.
+      description: Notification service or entity to send the notification to (e.g. notify.all_devices).
       selector:
-        entity:
-          domain: notify
+        text:
 
     notification_message:
       name: Message
