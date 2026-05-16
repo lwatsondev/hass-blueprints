@@ -18,13 +18,12 @@ blueprint:
             - integration: reolink
               domain: binary_sensor
 
-    notification_targets:
-      name: Notification targets
-      description: Notification entities to send the notification to.
+    notification_target:
+      name: Notification target
+      description: Notification entity to send the notification to.
       selector:
         entity:
           domain: notify
-          multiple: true
 
     notification_message:
       name: Message
@@ -137,7 +136,7 @@ trigger:
 
 variables:
   timestamp: "{{ now().strftime('%Y%m%d_%H%M%S') }}"
-  notification_targets: !input notification_targets
+  notification_target: !input notification_target
   notification_image: !input notification_image
   notification_image_domain: "{{ notification_image.split('.')[0] }}"
   notification_rate_limit: !input notification_rate_limit
@@ -176,9 +175,7 @@ action:
 
   - delay: !input notification_delay
 
-  - action: notify.send_message
-    target:
-      entity_id: "{{ notification_targets }}"
+  - service: "{{ notification_target }}"
     data:
       message: !input notification_message
       title: !input notification_title
